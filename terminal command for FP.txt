@@ -1,0 +1,15 @@
+python -m uvicorn main_FP:app --reload
+
+streamlit run ui_FP.py
+
+docker info
+
+docker-compose up --build
+
+python regenerate_model_v2.py
+
+docker-compose down
+
+docker-compose up --build
+
+http://localhost:8501
