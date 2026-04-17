@@ -17,6 +17,7 @@ Constraints:
   - Always drop first 24 rows after creating lag features
 """
 
+import os
 import pandas as pd
 import numpy as np
 
@@ -58,7 +59,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def main() -> None:
-    df = pd.read_csv("master_df.csv")
+    df = pd.read_csv("data/master_df.csv")
     df = df.sort_values("month").reset_index(drop=True)
     print(f"Loaded master_df: {df.shape}")
 
@@ -115,10 +116,11 @@ def main() -> None:
           f"({test_lo['month'].min()} → {test_lo['month'].max()})")
 
     # ── Save ──────────────────────────────────────────────────────────────────
-    features_with_temp.to_csv("features_with_temp.csv", index=False)
-    features_lag_only.to_csv("features_lag_only.csv",   index=False)
-    print("\n  Saved → features_with_temp.csv")
-    print("  Saved → features_lag_only.csv")
+    os.makedirs("data", exist_ok=True)
+    features_with_temp.to_csv("data/features_with_temp.csv", index=False)
+    features_lag_only.to_csv("data/features_lag_only.csv",   index=False)
+    print("\n  Saved → data/features_with_temp.csv")
+    print("  Saved → data/features_lag_only.csv")
 
     # ── Summary ───────────────────────────────────────────────────────────────
     print("\nFeature summary:")

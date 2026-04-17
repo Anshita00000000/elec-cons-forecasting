@@ -114,7 +114,7 @@ def fetch_eia_sales() -> pd.DataFrame:
     return pivot[["month", "sales_COM", "sales_IND", "sales_RES", "sales_total"]]
 
 
-def _build_offline_sales(cache_path: str = "_cache_master_df.csv") -> pd.DataFrame:
+def _build_offline_sales(cache_path: str = "data/_cache_master_df.csv") -> pd.DataFrame:
     """
     Offline fallback: derive sector sales from cached total sales using
     time-varying EIA sector-share anchors, then extend to 2026-03.
@@ -223,7 +223,7 @@ def build_temperature_df() -> pd.DataFrame:
     return temp
 
 
-def _build_offline_temperature(cache_path: str = "_cache_master_df.csv") -> pd.DataFrame:
+def _build_offline_temperature(cache_path: str = "data/_cache_master_df.csv") -> pd.DataFrame:
     """
     Offline fallback: derive tmax/tmin from temp_avg_f in cached CSV using a
     seasonal half-spread model calibrated to NOAA monthly normals:
@@ -356,10 +356,11 @@ def _use_offline(cache_path: str) -> tuple[pd.DataFrame, pd.DataFrame]:
 if __name__ == "__main__":
     # Preserve the original file before overwriting so offline mode
     # can always find the cached raw data on subsequent runs.
-    cache_path = "_cache_master_df.csv"
-    if os.path.exists("master_df.csv") and not os.path.exists(cache_path):
+    cache_path = "data/_cache_master_df.csv"
+    os.makedirs("data", exist_ok=True)
+    if os.path.exists("data/master_df.csv") and not os.path.exists(cache_path):
         import shutil
-        shutil.copy("master_df.csv", cache_path)
+        shutil.copy("data/master_df.csv", cache_path)
         print(f"  Cached original master_df.csv → {cache_path}")
 
     mode = "online"
@@ -375,7 +376,7 @@ if __name__ == "__main__":
         mode = "offline"
 
     master = merge_datasets(sales_df, temp_df)
-    validate_and_save(master)
+    validate_and_save(master, "data/master_df.csv")
 
     print(
         f"\nPart 1 complete. master_df.csv created ({mode} mode). "

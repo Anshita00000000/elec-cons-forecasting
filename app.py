@@ -143,34 +143,34 @@ def recursive_forecast_rnn(model, history_df, n_steps, feat_cols, X_scaler, y_sc
 @st.cache_resource
 def load_all():
     """Load all model artefacts and data once. Results are cached."""
-    master   = pd.read_csv("master_df.csv").sort_values("month").reset_index(drop=True)
-    results  = pd.read_csv("model_results.csv").set_index("Model")
+    master   = pd.read_csv("data/master_df.csv").sort_values("month").reset_index(drop=True)
+    results  = pd.read_csv("outputs/model_results.csv").set_index("Model")
 
-    with open("monthly_temp_baselines.json") as f:
+    with open("outputs/monthly_temp_baselines.json") as f:
         temp_baselines = json.load(f)
 
-    with open("sarima_model.pkl", "rb") as f:
+    with open("models/sarima_model.pkl", "rb") as f:
         sarima_model = pickle.load(f)
 
-    with open("xgboost_model.pkl", "rb") as f:
+    with open("models/xgboost_model.pkl", "rb") as f:
         xgb_model = pickle.load(f)
 
-    with open("linear_model.pkl", "rb") as f:
+    with open("models/linear_model.pkl", "rb") as f:
         lr_model = pickle.load(f)
 
-    with open("feature_scaler.pkl", "rb") as f:
+    with open("models/feature_scaler.pkl", "rb") as f:
         lr_scaler = pickle.load(f)
 
-    with open("lstm_scaler.pkl", "rb") as f:
+    with open("models/lstm_scaler.pkl", "rb") as f:
         lstm_scalers = pickle.load(f)
     X_scaler_lstm = lstm_scalers["X"]
     y_scaler_lstm = lstm_scalers["y"]
 
-    lstm_model = tf.keras.models.load_model("lstm_model.keras")
-    gru_model  = tf.keras.models.load_model("gru_model.keras")
+    lstm_model = tf.keras.models.load_model("models/lstm_model.keras")
+    gru_model  = tf.keras.models.load_model("models/gru_model.keras")
 
-    feat_wt = pd.read_csv("features_with_temp.csv")
-    feat_lo = pd.read_csv("features_lag_only.csv")
+    feat_wt = pd.read_csv("data/features_with_temp.csv")
+    feat_lo = pd.read_csv("data/features_lag_only.csv")
     feat_cols_wt = [c for c in feat_wt.columns if c not in ("month", TARGET)]
     feat_cols_lo = [c for c in feat_lo.columns if c not in ("month", TARGET)]
 

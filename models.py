@@ -308,10 +308,13 @@ def make_sequences(X: np.ndarray, y: np.ndarray,
 # ===========================================================================
 
 def main() -> None:
+    os.makedirs("models",  exist_ok=True)
+    os.makedirs("outputs", exist_ok=True)
+
     # ── Load data ──────────────────────────────────────────────────────────────
-    master   = pd.read_csv("master_df.csv")
-    feat_wt  = pd.read_csv("features_with_temp.csv")
-    feat_lo  = pd.read_csv("features_lag_only.csv")
+    master   = pd.read_csv("data/master_df.csv")
+    feat_wt  = pd.read_csv("data/features_with_temp.csv")
+    feat_lo  = pd.read_csv("data/features_lag_only.csv")
 
     master = master.sort_values("month").reset_index(drop=True)
 
@@ -346,9 +349,9 @@ def main() -> None:
 
     # ── Temperature baselines (training data only) ────────────────────────────
     temp_baselines = build_temp_baselines(train_master)
-    with open("monthly_temp_baselines.json", "w") as f:
+    with open("outputs/monthly_temp_baselines.json", "w") as f:
         json.dump(temp_baselines, f, indent=2)
-    print("  Saved monthly_temp_baselines.json")
+    print("  Saved outputs/monthly_temp_baselines.json")
 
     # ── MODEL 1: SARIMA ────────────────────────────────────────────────────────
     print("\n── SARIMA ──────────────────────────────────────────────────────────")
@@ -368,9 +371,9 @@ def main() -> None:
     # 27-step forecast with confidence intervals
     sarima_preds, sarima_ci = sarima_model.predict(n_periods=27, return_conf_int=True, alpha=0.05)
 
-    with open("sarima_model.pkl", "wb") as f:
+    with open("models/sarima_model.pkl", "wb") as f:
         pickle.dump(sarima_model, f)
-    print("  Saved sarima_model.pkl")
+    print("  Saved models/sarima_model.pkl")
 
     # ── MODEL 2: XGBoost ───────────────────────────────────────────────────────
     print("\n── XGBoost ─────────────────────────────────────────────────────────")
@@ -403,7 +406,7 @@ def main() -> None:
     ax.set_xlabel("Importance")
     ax.set_title("XGBoost Feature Importance (Top 15)", fontweight="bold")
     plt.tight_layout()
-    plt.savefig("xgboost_feature_importance.png", bbox_inches="tight")
+    plt.savefig("outputs/xgboost_feature_importance.png", bbox_inches="tight")
     plt.close()
 
     # XGBoost recursive forecast from end of training
@@ -412,9 +415,9 @@ def main() -> None:
         temp_baselines, scaler=None, include_temp=True,
     )
 
-    with open("xgboost_model.pkl", "wb") as f:
+    with open("models/xgboost_model.pkl", "wb") as f:
         pickle.dump(xgb_model, f)
-    print("  Saved xgboost_model.pkl")
+    print("  Saved models/xgboost_model.pkl")
 
     # ── MODEL 3: Linear Regression ─────────────────────────────────────────────
     print("\n── Linear Regression ───────────────────────────────────────────────")
@@ -428,11 +431,11 @@ def main() -> None:
         temp_baselines, scaler=lr_scaler, include_temp=True,
     )
 
-    with open("linear_model.pkl", "wb") as f:
+    with open("models/linear_model.pkl", "wb") as f:
         pickle.dump(lr_model, f)
-    with open("feature_scaler.pkl", "wb") as f:
+    with open("models/feature_scaler.pkl", "wb") as f:
         pickle.dump(lr_scaler, f)
-    print("  Saved linear_model.pkl  +  feature_scaler.pkl")
+    print("  Saved models/linear_model.pkl  +  models/feature_scaler.pkl")
 
     # ── MODEL 4: LSTM ──────────────────────────────────────────────────────────
     print("\n── LSTM ────────────────────────────────────────────────────────────")
@@ -467,10 +470,10 @@ def main() -> None:
         X_scaler_lstm, y_scaler_lstm,
     )
 
-    lstm_model.save("lstm_model.keras")
-    with open("lstm_scaler.pkl", "wb") as f:
+    lstm_model.save("models/lstm_model.keras")
+    with open("models/lstm_scaler.pkl", "wb") as f:
         pickle.dump({"X": X_scaler_lstm, "y": y_scaler_lstm}, f)
-    print("  Saved lstm_model.keras  +  lstm_scaler.pkl")
+    print("  Saved models/lstm_model.keras  +  models/lstm_scaler.pkl")
 
     # ── MODEL 5: GRU ───────────────────────────────────────────────────────────
     print("\n── GRU ─────────────────────────────────────────────────────────────")
@@ -492,8 +495,8 @@ def main() -> None:
         X_scaler_lstm, y_scaler_lstm,
     )
 
-    gru_model.save("gru_model.keras")
-    print("  Saved gru_model.keras")
+    gru_model.save("models/gru_model.keras")
+    print("  Saved models/gru_model.keras")
 
     # ── Evaluation ─────────────────────────────────────────────────────────────
     print("\n── Evaluation ──────────────────────────────────────────────────────")
@@ -520,8 +523,8 @@ def main() -> None:
 
     results = pd.DataFrame(rows).set_index("Model")
     print("\n" + results.to_string())
-    results.to_csv("model_results.csv")
-    print("\n  Saved model_results.csv")
+    results.to_csv("outputs/model_results.csv")
+    print("\n  Saved outputs/model_results.csv")
 
     # ── CHART 1: Actual vs Predicted (5 subplots) ─────────────────────────────
     fig, axes = plt.subplots(5, 1, figsize=(14, 18), sharex=True)
@@ -541,9 +544,9 @@ def main() -> None:
     fig.suptitle("Actual vs Predicted — Holdout Period (Jan 2024 – Mar 2026)",
                  fontsize=14, fontweight="bold", y=1.01)
     plt.tight_layout()
-    plt.savefig("evaluation_chart.png", bbox_inches="tight")
+    plt.savefig("outputs/evaluation_chart.png", bbox_inches="tight")
     plt.close()
-    print("  Saved evaluation_chart.png")
+    print("  Saved outputs/evaluation_chart.png")
 
     # ── CHART 2: Forward forecast from last data point ────────────────────────
     # Best model per horizon
@@ -626,9 +629,9 @@ def main() -> None:
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
     plt.xticks(rotation=30, ha="right")
     plt.tight_layout()
-    plt.savefig("forecast_chart.png", bbox_inches="tight")
+    plt.savefig("outputs/forecast_chart.png", bbox_inches="tight")
     plt.close()
-    print("  Saved forecast_chart.png")
+    print("  Saved outputs/forecast_chart.png")
 
     # ── Summary ────────────────────────────────────────────────────────────────
     print("\n" + "=" * 70)
