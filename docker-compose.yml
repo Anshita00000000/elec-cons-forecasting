@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  dashboard:
+    build: .
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+    environment:
+      - EIA_API_KEY=${EIA_API_KEY}
+    restart: unless-stopped

@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+regenerate_model_v2.ipynb
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
