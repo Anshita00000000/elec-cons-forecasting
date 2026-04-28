@@ -11,26 +11,6 @@ dashboard with no manual data-entry required.
 
 ---
 
-## What changed from v1
-
-- **Holidays removed:** v1 used `holidays.India()` on US national data — holidays feature
-  dropped entirely; no holiday data is used.
-- **Revenue excluded:** `revenue_musd` was a target-leaking feature (revenue = price × sales)
-  and has been permanently removed from all feature sets.
-- **TimeSeriesSplit replaces KFold:** v1 used `KFold(shuffle=True)` on time-series data,
-  which causes future-leaking. All cross-validation now uses `TimeSeriesSplit(n_splits=5)`.
-- **Lag features replace future inputs:** v1 required users to manually enter 14 feature
-  values including future temperature. The new model uses lag features (1, 2, 3, 6, 12,
-  24-month lags + rolling stats) so forecasts require only historical data.
-- **Dashboard replaces manual UI:** the Streamlit app auto-computes all forecasts on startup;
-  no user inputs are required.
-- **Heatmap title fixed:** v1 had a copy-paste error — "Iris Dataset" title on an
-  electricity correlation heatmap. All chart titles are now accurate and descriptive.
-- **Test set corrected:** v1 used 2025 data as holdout despite it being partially
-  unavailable. The new holdout is 2024-01 to 2026-03 (27 full months of published data).
-
----
-
 ## Data sources
 
 - **EIA APIv2:** Retail electricity sales (Commercial, Industrial, Residential sectors) —
